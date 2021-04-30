@@ -3,6 +3,18 @@
 <%@ include file="../header.jsp" %>
 
 <h2>게시판</h2>
+<%-- 
+	만약 파라미터 type과 word가 없으면, 전체 목록을 불러오고,
+	아니면, type과 word를 전달하면서 DAO의 메서드를 호출하여 조건에 맞는 목록만 불러온다
+ --%>
+<c:if test="${empty param.type }">
+	<c:set var="boardList" value="${dao.selectList() }" />
+</c:if>
+
+<c:if test="${not empty param.type }">
+	<c:set var="boardList" value="${dao.selectList(param.type, param.word) }" />
+</c:if>
+
 <div class="board-list">
 	<table>
 		<thead>
@@ -15,7 +27,12 @@
 			</tr>
 		</thead>
 		<tbody>
-			<c:forEach var="boardDTO" items="${dao.selectList() }">
+		<c:if test="${empty boardList }">
+			<tr>
+				<th colspan="5"><h2>검색 결과가 없습니다</h2></th>
+			</tr>
+		</c:if>
+			<c:forEach var="boardDTO" items="${boardList }">
 				<tr class="boardDTO">
 					<td>${boardDTO.idx }</td>
 					<td>
@@ -33,11 +50,11 @@
 	<div>
 		<form>
 			<select name="type">
-				<option value="title">제목으로 검색</option>
-				<option value="writer">작성자로 검색</option>
-				<option value="content">내용으로 검색</option>
+				<option ${param.type == 'title' ? 'selected' : '' } value="title">제목으로 검색</option>
+				<option ${param.type == 'writer' ? 'selected' : '' } value="writer">작성자로 검색</option>
+				<option ${param.type == 'content' ? 'selected' : '' } value="content">내용으로 검색</option>
 			</select>
-			<input type="search" name="word">
+			<input type="search" name="word" value="${param.word }" placeholder="검색어를 입력하세요">
 			<input type="submit" value="검색">
 		</form>
 	</div>
